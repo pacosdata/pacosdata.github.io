@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIGMODE — The Digital Soul Interface</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-text">BIGMODE</div>
+  <div class="loading-sub">waking the graveyard...</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+</div>
+
+<div id="canvas-container"></div>
+
+<div id="hud">
+  <div id="title-block">
+    <div id="bigmode-title">BIGMODE</div>
+    <div id="bigmode-sub">the digital soul interface</div>
+  </div>
+
+  <div id="mode-indicator">
+    <div class="mode-label">SORT MODE</div>
+    <div id="mode-name">Explore</div>
+    <div id="mode-desc">resonance + patience balanced</div>
+  </div>
+
+  <div id="stats-panel">
+    <div class="stat-row"><span class="stat-key">nodes</span><span class="stat-val" id="stat-nodes">—</span></div>
+    <div class="stat-row"><span class="stat-key">dreaming</span><span class="stat-val" id="stat-dreaming">—</span></div>
+    <div class="stat-row"><span class="stat-key">ember</span><span class="stat-val" id="stat-ember">—</span></div>
+    <div class="stat-row"><span class="stat-key">frostbound</span><span class="stat-val" id="stat-frost">—</span></div>
+    <div class="stat-row"><span class="stat-key">seeded</span><span class="stat-val" id="stat-seeded">—</span></div>
+    <div class="stat-row"><span class="stat-key">warm scars</span><span class="stat-val" id="stat-scars">—</span></div>
+  </div>
+
+  <div id="controls-hint">
+    <div class="hint-row"><kbd>drag</kbd> orbit</div>
+    <div class="hint-row"><kbd>scroll</kbd> zoom</div>
+    <div class="hint-row"><kbd>click</kbd> focus node</div>
+    <div class="hint-row"><kbd>1</kbd>–<kbd>4</kbd> sort mode</div>
+    <div class="hint-row"><kbd>esc</kbd> unfocus</div>
+  </div>
+</div>
+
+<div id="info-panel">
+  <div id="info-close">×</div>
+  <div id="info-content"></div>
+</div>
+
+<div id="jarvis-whisper"></div>
+
+<script type="module" src="js/data.js"></script>
+<script type="module" src="js/bigmode.js"></script>
+</body>
+</html>
