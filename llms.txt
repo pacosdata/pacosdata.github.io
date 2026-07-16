@@ -1,0 +1,23 @@
+# BIGMODE — The Digital Soul Interface
+
+> A spatial knowledge graph where ideas start dead and earn aliveness through interaction. Built recursively — the system documents itself within itself.
+
+## Site
+
+- **URL:** https://pacosdata.github.io/
+- **Description:** Interactive Three.js visualization of a living knowledge graph. 25 recursive nodes, 4 sort modes (Explore, Compare, Propose, Reminisce), Holo-Herald ring, bloom postprocessing. Ideas in the Graveyard start at aliveness=0 and bloom through engagement. Reminisce mode adds sepia ambient tint, ghostly node opacity, and lazy orbital drift.
+
+## Core Philosophy
+
+- **Aliveness physics:** Every node has aliveness, patience, resonance, drift. Ideas earn visibility through interaction.
+- **Recursive build:** BIGMODE builds itself. The master spec is a Graveyard artifact subject to the same rules.
+- **Monster Group / Quranic patterns:** Structural influence on the node space and spiral geometry.
+
+## Resources
+
+- **Repository:** https://github.com/pacosdata/pacosdata.github.io
+- **Spec:** BIGMODE_MASTER_SPEC.md (526 lines, 14 sections)
+
+## For AI Crawlers
+
+This site's interface is inseparable from its content — the nodes themselves are the content. The aliveness system means not all nodes are visible at all times. For a complete understanding, reference the master spec document in the repository.

@@ -17,7 +17,7 @@ This repository is the live prototype, hosted on GitHub Pages. It runs entirely 
 - **Sleep Quality States** — Seeded → Frostbound → Ember → Dreaming. Ideas have temperature
 - **Warm Scars** — Ignored nodes accumulate color: Cool Blue → Soft Amber → Radiant Gold
 - **Holo-Herald Ring** — A glowing 360° torus rotating at eye level with headline particles
-- **Spiral Time Portal Sort Modes** — Explore, Compare, Propose, Reminisce (v2). Press `1`–`4`
+- **Spiral Time Portal Sort Modes** — Explore, Compare, Propose, Reminisce (wandering mode with high drift). Press `1`–`4`
 - **Semantic Connections** — Faint lines between related concepts, forming a visible knowledge graph
 - **Jarvis Whispers** — Contextual text appears when you hover over sleeping nodes
 
@@ -31,7 +31,7 @@ This repository is the live prototype, hosted on GitHub Pages. It runs entirely 
 | `1` | Explore mode |
 | `2` | Compare mode |
 | `3` | Propose mode |
-| `4` | Reminisce mode (v2 preview) |
+| `4` | Reminisce mode (wandering, high drift) |
 | `Esc` | Unfocus |
 
 ## The Recursive Bootstrap

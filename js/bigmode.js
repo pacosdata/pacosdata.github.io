@@ -17,6 +17,9 @@ const SLEEP_COLORS = {
   seeded:     new THREE.Color(0x3a3f55)
 };
 
+// Reminisce mode ambient glow — a soft, warm-but-distant sepia
+const REMINISCE_AMBIENT = new THREE.Color(0x332211);
+
 const SCAR_COLORS = {
   0: null,
   1: new THREE.Color(0x4a90d9),  // Cool Blue
@@ -56,7 +59,7 @@ const MODES = {
   },
   reminisce: {
     name: "Reminisce",
-    desc: "high drift, wandering without agenda (v2)",
+    desc: "wandering without agenda — patience guides the drift",
     weights: { r: 0.05, c: 0.15, p: 0.45, s: 0.25, d: 0.10 }
   }
 };
@@ -83,6 +86,14 @@ const WHISPERS = {
     "The deepest sleep holds the deepest potential."
   ]
 };
+
+const REMINISCE_WHISPERS = [
+  "Letting the drift carry you.",
+  "No agenda. No destination. Just the graveyard's breath.",
+  "These shapes — half-remembered, half-forgotten.",
+  "The past rearranges itself when you aren't looking.",
+  "Patient ideas surface when you stop searching."
+];
 
 // ===== STATE =====
 
@@ -477,6 +488,17 @@ function computeModeProminence() {
 
   nodeObjects.forEach((n, i) => {
     n.targetProminence = 0.25 + ((rawScores[i] - min) / range) * 0.75;
+    // Reminisce-specific drift seeds: each node wanders with its own phase
+    if (modeKey === 'reminisce') {
+      n.reminisceDrift = {
+        x: (Math.random() - 0.5) * 1.5,
+        z: (Math.random() - 0.5) * 1.5,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.08 + Math.random() * 0.12
+      };
+    } else if (n.reminisceDrift) {
+      delete n.reminisceDrift;
+    }
   });
 }
 
@@ -496,7 +518,7 @@ function switchMode(modeKey) {
     explore: "Showing you the balanced field.",
     compare: "Surfacing the tension. The sparks.",
     propose: "Bridging patient nodes forward.",
-    reminisce: "Wandering without agenda. (v2 preview)"
+    reminisce: REMINISCE_WHISPERS[Math.floor(Math.random() * REMINISCE_WHISPERS.length)]
   };
   showJarvisWhisper(whispers[modeKey], 2000);
 }
@@ -703,16 +725,19 @@ function animate() {
   controls.target.lerp(camTarget, 0.04);
   controls.update();
 
-  // Ring rotation
+  // Ring rotation — dims slightly in Reminisce mode
   if (ring) {
     ring.rotation.z += 0.0015;
     ring.rotation.y += 0.0008;
     const ringPulse = 1 + Math.sin(t * 0.5) * 0.05;
-    ring.material.emissiveIntensity = 0.5 * ringPulse;
+    const ringDim = currentMode === 'reminisce' ? 0.35 : 0.5;
+    ring.material.emissiveIntensity = ringDim * ringPulse;
   }
   if (ringParticles) {
     ringParticles.rotation.z += 0.0015;
     ringParticles.rotation.y += 0.0008;
+    const pDim = currentMode === 'reminisce' ? 0.3 : 0.5;
+    ringParticles.material.opacity += (pDim - ringParticles.material.opacity) * 0.02;
   }
 
   // Nebula slow drift
@@ -745,13 +770,28 @@ function animate() {
     const boost = isHovered ? 1.5 : isFocused ? 1.8 : 1.0;
     n.material.emissiveIntensity = n.baseEmissive * n.prominence * boost;
 
-    // Opacity
-    n.material.opacity = n.baseOpacity * (0.5 + n.prominence * 0.5);
+    // Reminisce ambient tint — warm sepia diffusion over the native sleep color
+    if (currentMode === 'reminisce') {
+      n.material.emissive.lerp(REMINISCE_AMBIENT, 0.015);
+      n.material.opacity = n.baseOpacity * (0.5 + n.prominence * 0.5) * 0.75;  // ghostly fade
+    } else {
+      n.material.emissive.lerp(SLEEP_COLORS[d.sleep_state], 0.05);
+      n.material.opacity = n.baseOpacity * (0.5 + n.prominence * 0.5);
+    }
 
-    // Subtle drift for seeded/frostbound nodes
-    if (d.sleep_state === 'seeded' || d.sleep_state === 'frostbound') {
+    // Reminisce drift — all nodes wander lazily
+    if (currentMode === 'reminisce' && n.reminisceDrift) {
+      const rd = n.reminisceDrift;
+      n.group.position.x = d.position[0] + Math.sin(t * rd.speed + rd.phase) * rd.x;
+      n.group.position.z = d.position[2] + Math.cos(t * rd.speed * 0.7 + rd.phase * 1.3) * rd.z;
+    } else if (d.sleep_state === 'seeded' || d.sleep_state === 'frostbound') {
       n.group.position.x = d.position[0] + Math.sin(t * 0.1 + n.driftSeed) * 0.3;
       n.group.position.y = d.position[1] + Math.cos(t * 0.08 + n.driftSeed) * 0.2;
+    } else {
+      // Reset any drift if not in a drifting mode
+      n.group.position.x = d.position[0];
+      n.group.position.y = d.position[1];
+      n.group.position.z = d.position[2];
     }
 
     // Warm scar pulse
