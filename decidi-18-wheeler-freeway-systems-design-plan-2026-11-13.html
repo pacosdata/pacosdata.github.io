@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>18 Wheeler: Freeway Systems Design Plan</title>
+<style>
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #2b3443;
+    background: #ffffff;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrapper {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+  header {
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #E6EBF3;
+  }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0A63FF;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #0A1422;
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+  .meta-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: #5C6779;
+  }
+  .meta-bar span strong {
+    color: #0A1422;
+  }
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0A1422;
+    margin: 36px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #E6EBF3;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0A1422;
+    margin: 22px 0 10px;
+  }
+  p {
+    margin-bottom: 14px;
+  }
+  strong {
+    color: #0A1422;
+    font-weight: 600;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.9em;
+    background: #F6F8FC;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid #E6EBF3;
+    color: #0A1422;
+  }
+  pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    background: #F6F8FC;
+    border: 1px solid #E6EBF3;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 16px 0;
+    overflow-x: auto;
+    color: #0A1422;
+  }
+  .card {
+    background: #ffffff;
+    border: 1px solid #E6EBF3;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+  }
+  .card-surface {
+    background: #F6F8FC;
+  }
+  .card h3:first-child, .card h4:first-child {
+    margin-top: 0;
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin: 18px 0;
+  }
+  .card-grid-item {
+    background: #ffffff;
+    border: 1px solid #E6EBF3;
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .pill-p0 { background: #FDECEC; color: #C0392B; }
+  .pill-p1 { background: #FEF3E2; color: #B9770E; }
+  .pill-p2 { background: #E8F1FF; color: #0A5BEC; }
+  .pill-p3 { background: #EEF2F7; color: #5C6779; }
+  .pill-p4 { background: #F6F8FC; color: #8A95A6; border: 1px solid #E6EBF3; }
+
+  /* Roadmap Timeline */
+  .timeline {
+    position: relative;
+    margin: 24px 0 32px 8px;
+    padding-left: 28px;
+    border-left: 2px solid #E6EBF3;
+  }
+  .timeline-step {
+    position: relative;
+    margin-bottom: 24px;
+  }
+  .timeline-step:last-child {
+    margin-bottom: 0;
+  }
+  .timeline-dot {
+    position: absolute;
+    left: -35px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #0A63FF;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 1px #0A63FF;
+  }
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .timeline-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0A1422;
+  }
+  .timeline-date {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0A63FF;
+    background: #E8F1FF;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .timeline-body {
+    background: #F6F8FC;
+    border: 1px solid #E6EBF3;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+
+  /* Table styling */
+  .table-scroll {
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    border: 1px solid #E6EBF3;
+    border-radius: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    text-align: left;
+  }
+  th, td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #E6EBF3;
+    vertical-align: top;
+  }
+  th {
+    background: #F6F8FC;
+    color: #0A1422;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  tbody tr:hover {
+    background: #FAFCFF;
+  }
+
+  /* Lists */
+  ul, ol {
+    margin: 10px 0 16px 20px;
+  }
+  li {
+    margin-bottom: 6px;
+  }
+
+  .callout {
+    border-left: 3px solid #0A63FF;
+    background: #F6F8FC;
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .callout-warn {
+    border-left-color: #B9770E;
+    background: #FEF9F0;
+  }
+
+  /* Milestones Strip */
+  .milestones-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    margin: 16px 0 24px;
+  }
+  .milestone-item {
+    background: #F6F8FC;
+    border: 1px solid #E6EBF3;
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .milestone-item .m-phase {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #0A63FF;
+    letter-spacing: 0.05em;
+  }
+  .milestone-item .m-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #0A1422;
+    margin: 2px 0;
+  }
+  .milestone-item .m-date {
+    font-size: 11px;
+    color: #5C6779;
+  }
+
+  footer {
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #E6EBF3;
+    font-size: 12px;
+    color: #8A95A6;
+    text-align: center;
+  }
+
+  @media print {
+    body {
+      font-size: 12px;
+      line-height: 1.45;
+      color: #111;
+      background: #ffffff;
+    }
+    .wrapper {
+      max-width: 100%;
+      padding: 0;
+    }
+    h1 { font-size: 22px; }
+    h2 { font-size: 16px; margin: 20px 0 10px; }
+    h3 { font-size: 13.5px; margin: 14px 0 6px; }
+    .card, .table-scroll, pre, .callout, .timeline-step, tr, .card-grid-item {
+      break-inside: avoid;
+    }
+    .timeline {
+      border-left-color: #ccc;
+    }
+    .timeline-dot {
+      background: #333;
+      box-shadow: none;
+    }
+    table { font-size: 11px; }
+    th, td { padding: 6px 8px; }
+    pre { font-size: 10.5px; padding: 8px; }
+    footer { font-size: 10px; margin-top: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="eyebrow">Production Architecture &amp; Delivery Roadmap</div>
+    <h1>18 Wheeler: Freeway Systems Design Plan</h1>
+    <div class="meta-bar">
+      <span><strong>Date:</strong> 13 November 2026</span>
+      <span><strong>Scope:</strong> Zone 1 Vertical Slice (Reusable 8-Zone Architecture)</span>
+      <span><strong>Sources:</strong> <code>idea-for-a-game.txt</code> · <code>meow.txt</code></span>
+    </div>
+  </header>
+
+  <!-- Executive Summary Card -->
+  <div class="card card-surface">
+    <h3 style="margin-top:0;">Bottom Line Verdict</h3>
+    <p><strong>Build one freeway, not eight.</strong> For four weeks the sole focus is a truck that is an absolute joy to steer, followed by fair mainline merges crowned by a satisfying micro-celebration, a cast of recognizable drivers, and a systemic highway patrol response.</p>
+    <p style="margin-bottom:0;"><strong>Immediate Checkpoint:</strong> Test steering with cold testers by Friday 20 November 2026 before building any surrounding traffic. If 4 of 5 cannot execute a deliberate lane change within 60s, halt generation and adjust tooling or enlist engineering support before advancing.</p>
+  </div>
+
+  <!-- Milestone Track -->
+  <div class="milestones-strip">
+    <div class="milestone-item">
+      <div class="m-phase">Phase 0</div>
+      <div class="m-name">Steering Toy</div>
+      <div class="m-date">16–20 Nov</div>
+    </div>
+    <div class="milestone-item">
+      <div class="m-phase">Phase 1</div>
+      <div class="m-name">Road &amp; Merge</div>
+      <div class="m-date">23 Nov–4 Dec</div>
+    </div>
+    <div class="milestone-item">
+      <div class="m-phase">Phase 2</div>
+      <div class="m-name">Inhabited Road</div>
+      <div class="m-date">7–18 Dec</div>
+    </div>
+    <div class="milestone-item">
+      <div class="m-phase">Phase 3</div>
+      <div class="m-name">Consequences</div>
+      <div class="m-date">21 Dec–8 Jan</div>
+    </div>
+    <div class="milestone-item">
+      <div class="m-phase">Phase 4</div>
+      <div class="m-name">Cold Gate Test</div>
+      <div class="m-date">11–22 Jan</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <h2>1. Goal and Definition of Done</h2>
+  <p><strong>Goal:</strong> One complete freeway loop that a stranger wants to drive again immediately. The cute cab and articulated trailer steer via captured mouse. The road is populated with recognizable drivers. Merging onto a new route is an expressive skill check yielding a Mario flag-style micro-celebration. Police enforcement and road friction are bound strictly to money and notoriety—never arbitrary RNG punishment.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Slice Acceptance Gate (5 Non-Negotiable Conditions)</h3>
+    <p style="font-size:13.5px; color:#5C6779;">Thresholds are locked before testing starts and cannot be altered retrospectively. Evaluated cold with 5 unassisted test subjects:</p>
+    <ol>
+      <li><strong>Intuitive Handling:</strong> 5 strangers play cold with zero instructions. At least 4 of 5 execute a deliberate lane change within 60 seconds.</li>
+      <li><strong>Retention Pull:</strong> At least 4 of 5 initiate a second run voluntarily without prompting.</li>
+      <li><strong>Merge Legibility:</strong> 0 of 5 testers describe a highway merge as "unfair" in post-play debriefs.</li>
+      <li><strong>Driver Recognition:</strong> At least 3 of 5 recognize the same recurring AI vehicle or stop character on their second run unprompted.</li>
+      <li><strong>Systemic Fairness:</strong> During police stops of other cars, 100% of 200 automated runs preserve an accessible gap around the incident (test AT-19).</li>
+    </ol>
+  </div>
+  <p><strong>Explicitly Out of Slice Scope:</strong> Zones 2 through 8, dark/illicit cargo routes, MySQL personality database scraping, mod frameworks, the beat-em-up brawler subsystem, and full <em>Papers, Please</em>-grade border inspections. All preserved as post-slice goals.</p>
+
+  <!-- SECTION 2 -->
+  <h2>2. Assumptions and Missing Inputs</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Assumption / Item</th><th>Operational Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>A1</strong></td><td>Platform is desktop browser or PC. Mouse-on-cab soft-well steering mandates hardware pointer support.</td><td>Assumed</td></tr>
+        <tr><td><strong>A2</strong></td><td>1990s analog setting: physical paper route cards, CB radio squawk, payphones, no GPS app. Dash evidence is a stylized VHS camcorder tape.</td><td>Stated vote; deliberate VHS aesthetic</td></tr>
+        <tr><td><strong>A3</strong></td><td>Generative builder tool (Rosebud AI / Claude / GPT) supports source backup, code downloads, and version rollbacks.</td><td>Unconfirmed</td></tr>
+        <tr><td><strong>A4</strong></td><td>On-call technical collaborator available if LLM code generation enters hallucination or unfixable loops.</td><td>Unknown</td></tr>
+        <tr><td><strong>A5</strong></td><td>Budget &amp; strict delivery deadline. Earlier passing references never formalized.</td><td>Unknown (Non-blocking for Weeks 1–4)</td></tr>
+        <tr><td><strong>A6</strong></td><td><strong>Your 50-Animation Inventory.</strong> Ratios provided (50 total: 30 driving / 20 transitions), but specific naming and sprite contents omitted.</td><td><strong>Missing Input</strong> (Reconciled in §7)</td></tr>
+        <tr><td><strong>A7</strong></td><td>MySQL people table schema and database fields unseen.</td><td><strong>Missing Input</strong> (Deferred to §18)</td></tr>
+        <tr><td><strong>A8</strong></td><td>All numeric metrics marked <em>(start)</em> are initial tuning points located in a central constants file.</td><td>Assumption</td></tr>
+        <tr><td><strong>A9</strong></td><td>Economy operates in USD. All financial quantities are placeholder balancing values.</td><td>Assumed</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 3 -->
+  <h2>3. The Player Loop</h2>
+  <pre>Stop 1 (talk to staff, accept job, review route card, pay repairs)
+   → on-ramp → MERGE GATE 1 (skill evaluation &amp; flag celebration)
+   → freeway (traffic psychology, patrol cruisers, route choice at interchange)
+   → [if Route B selected] MERGE GATE 2 onto Route B (flag celebration)
+   → off-ramp → camera fade → Stop 2 (delivery payout, customer memory check)
+   → fade to Stop 1, fresh dispatch: recurring vehicles have evolved states</pre>
+  <p>In this vertical slice, "return" equates to an immediate subsequent Stop 1 → Stop 2 haul. The fade back bypasses the empty reverse drive at zero cost. Full reverse-direction road geometry will be layered later.</p>
+
+  <div class="card-grid">
+    <div class="card-grid-item">
+      <strong>The Trailer is the Toy</strong>
+      <p style="font-size:13px; margin:4px 0 0; color:#5C6779;">Tactile articulation, soft wells, and mouse drag make steering inherently engaging even in an empty lane.</p>
+    </div>
+    <div class="card-grid-item">
+      <strong>Traffic is Inhabited</strong>
+      <p style="font-size:13px; margin:4px 0 0; color:#5C6779;">Vehicles are not anonymous dynamic obstacles; they are expressively driven by named characters with social memory.</p>
+    </div>
+    <div class="card-grid-item">
+      <strong>Legible Consequence</strong>
+      <p style="font-size:13px; margin:4px 0 0; color:#5C6779;">Every ticket, delay, scrape, and impound maps directly to cash and notoriety—never sudden deaths.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <h2>4. Core Driving Model</h2>
+
+  <h3>4.1 Screen &amp; World Coordinate System</h3>
+  <ul>
+    <li>The cab is anchored vertically at ~75% of screen height <em>(start)</em>, featuring a ±0.5 cab-length forward/aft elastic margin: creeping forward under hard throttle and squatting under heavy braking.</li>
+    <li>Lateral displacement is real: the truck crosses discrete lane bands.</li>
+    <li>Highway lanes, ambient scenery, and traffic scroll downward matching the cab's true forward velocity.</li>
+    <li>Coordinates remain segment-local: wrap scroll offsets modulo segment length; pool traffic objects instead of allocating dynamically while driving.</li>
+  </ul>
+
+  <h3>4.2 Steering: Soft Wells with Speed Sensitivity</h3>
+  <p>Mouse capture uses <code>Pointer Lock</code>. The cursor's angle &theta; around an invisible pivot on the cab translates directly to front wheel rotation. Distance from center adjusts effort/damping, never angle.</p>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Cursor &theta; (from 12:00)</th><th>Steering Wheel Angle</th><th>Front-Wheel Angle (&delta;)</th><th>Haptic Well Profile</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>0&deg;</td><td>0&deg;</td><td>0&deg;</td><td>Soft Magnetic Center</td></tr>
+        <tr><td>&plusmn;20&deg;</td><td>&plusmn;90&deg;</td><td>&plusmn;3.5&deg;</td><td>Fine adjustment boundary</td></tr>
+        <tr><td>&plusmn;40&deg;</td><td>&plusmn;360&deg; (1 turn)</td><td>&plusmn;14&deg;</td><td>Medium resistance well</td></tr>
+        <tr><td>&plusmn;70&deg;</td><td>&plusmn;540&deg; (1.5 turns)</td><td>&plusmn;21&deg;</td><td>Firm resistance well</td></tr>
+        <tr><td>&plusmn;115&deg;</td><td>&plusmn;720&deg; (2 turns)</td><td>&plusmn;28&deg;</td><td>Heavy resistance well</td></tr>
+        <tr><td>&plusmn;150&deg; (clamped)</td><td>&plusmn;900&deg; (2.5 turns)</td><td>&plusmn;35&deg;</td><td>Lock well (breakaway flick required)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li><strong>Speed-Sensitive Lock Clamping:</strong> Dynamic wheel limit formula: <code>Allowed Rotation = 900&deg; &times; (1 &minus; 0.75 &times; speed / top_speed)</code>. Front wheel max clamp: <code>35&deg; &times; (1 &minus; 0.75 &times; speed / top_speed)</code>. At top speed, max steering is clamped to 8.75&deg; (225&deg; wheel rotation) to preserve highway stability, relaxing to full 35&deg; authority at crawling speeds.</li>
+    <li><strong>Self-Centering:</strong> Neutral well pull scales with velocity: 2&deg;/s at rest up to 240&deg;/s at cruising speed <em>(start)</em>. Returning mouse to 12:00 snaps wheel from max speed lock (225&deg;) down to &lt;5&deg; front angle in ~0.4s.</li>
+    <li><strong>Slew Limiter:</strong> Wheel rotation capped at 720&deg;/s <em>(start)</em>. Lock release requires high-velocity mouse flick so jittery hands never slip.</li>
+    <li><strong>HUD:</strong> An overlaid translucent steering wheel with a gripping hand icon communicates angular displacement clearly.</li>
+  </ul>
+
+  <h3>4.3 Kinematics (Fixed 60 Hz Simulation)</h3>
+  <pre>Heading 0 = Up the road.
+WB = Cab Wheelbase | L = Hitch-to-Axle Length | &delta; = Front-Wheel Angle (rad)
+
+d&theta;c/dt = (v / WB) &middot; tan(&delta;)                     [Clamped |&theta;c| &le; 30&deg; on highway]
+Cab Drift: x_c += v &middot; sin(&theta;c) &middot; dt
+Hitch Point H = Cab Rear-Axle Vector
+d&theta;t/dt = (v / L) &middot; sin(&theta;c &minus; &theta;t)
+Trailer Axle Position = H &minus; L &middot; (sin &theta;t, cos &theta;t)  [Hard kinematic constraint]</pre>
+  <p><strong>Note on Feel:</strong> Position the trailer axle via strict constraint satisfaction, never direct positional integration, preventing trailer separation under frame hiccups. Tunable <code>trailer_swing_gain</code> (baseline 1.0, testable to 2.5) amplifies visible lag on subtle highway lane maneuvers.</p>
+
+  <h3>4.4 Default Controls</h3>
+  <p>Mouse steers. <kbd>Space</kbd> Throttle, <kbd>F</kbd> Brake, <kbd>W</kbd>/<kbd>S</kbd> Gear shifts (automatic default), <kbd>Q</kbd>/<kbd>E</kbd> Left/Right blinkers, <kbd>H</kbd> Horn. Fully remappable on day one.</p>
+
+  <!-- SECTION 5 -->
+  <h2>5. Freeway System Architecture</h2>
+
+  <h3>5.1 Topology</h3>
+  <ul>
+    <li><strong>World Scale:</strong> 8 complete zones planned. Zone 1 built for slice.</li>
+    <li><strong>Segment Schema:</strong> <code>lanes (1–3)</code>, <code>length (in screen-heights)</code>, <code>speed_limit</code>, <code>flow_speed</code>, <code>congestion (0.0–1.0)</code>, <code>ramps[]</code>, <code>scripted_events[]</code>, <code>lighting (day/dusk/night)</code>.</li>
+    <li><strong>Ramp Schema:</strong> <code>type (on/off)</code>, <code>side</code>, <code>taper_length</code>, <code>exit_id</code>, <code>gore_point</code>.</li>
+    <li><strong>Shoulder:</strong> Dedicated 1-lane-width right shoulder reserved for pull-overs, stalls, and cruiser interventions.</li>
+  </ul>
+
+  <h3>5.2 Zone 1 Segment Layout</h3>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Seg</th><th>Route</th><th>Lanes</th><th>Roadway Content</th><th>Design Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>S1</strong></td><td>A</td><td>2 + ramp</td><td>Stop 1 access, on-ramp, <strong>Merge Gate 1</strong></td><td>Tutorialize merging mechanics; flag flourish</td></tr>
+        <tr><td><strong>S2</strong></td><td>A</td><td>3</td><td>Open freeway stretch, zero ramps/merges</td><td>Establish speed baseline; steering practice (&ge;30% trip time)</td></tr>
+        <tr><td><strong>S3</strong></td><td>A</td><td>3</td><td>Recurring R1 &amp; R2 appear; early &amp; late merges; <strong>Fuel Exit</strong></td><td>Traffic psychology demonstration</td></tr>
+        <tr><td><strong>S4</strong></td><td>A</td><td>3</td><td><strong>Scripted highway stop</strong> of R2 (Kit) on right shoulder</td><td>Demonstrate systemic cruiser intervention &amp; YIELD logic</td></tr>
+        <tr><td><strong>S5</strong></td><td>A &rarr; B</td><td>3 &rarr; 2</td><td>Sign gantry overhead; <strong>Route Choice</strong>; connector ramp + <strong>Gate 2</strong></td><td>Route bifurcation mechanics</td></tr>
+        <tr><td><strong>S6A</strong></td><td>A</td><td>3</td><td>Direct off-ramp into Stop 2, exit commit gore point</td><td>Dense, congested route finish (congest. 0.6)</td></tr>
+        <tr><td><strong>S6B</strong></td><td>B</td><td>2</td><td>Off-ramp into Stop 2; <strong>Static speed-trap cruiser</strong>; 1.5&times; length</td><td>Calm, extended detour finish (congest. 0.25)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>5.3 Fair Merge Rules</h3>
+  <ul>
+    <li>Lane changes are <strong>Declared</strong> if blinkers run for &ge;1.0s <em>(start)</em> before crossing lines; undeclared changes into another car's reaction circle register as Unsafe Lane Change infractions.</li>
+    <li>Merging vehicles spawn offscreen &ge;6 car lengths away.</li>
+    <li>Every incoming merge presents a visual warning &ge;2.0s prior: headlights, roadside shadows, or visible blinkers.</li>
+    <li>At least one viable escape route (brake clearance, switch, or yield) is guaranteed for 100% of merges.</li>
+    <li>&ge;70% of AI merges are signaled. Unsignaled merges require visible lateral drift for &ge;0.6s before encroaching.</li>
+  </ul>
+
+  <!-- SECTION 6 -->
+  <h2>6. Merge Celebration (The Mario Flag Moment)</h2>
+  <p><strong>Trigger Condition:</strong> Evaluated at Merge Gates 1 &amp; 2. The player must hold all criteria continuously for 1.5s <em>(start)</em>: centered in mainline lane band, cab and trailer completely past taper, forward speed &ge;80% of flow, and zero Contact/Heavy collisions inside the gate envelope.</p>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Merge Grade</th><th>Kinematic Condition at Gate</th><th>Celebration Effect &amp; Payout</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:#0A63FF;">Perfect</strong></td>
+          <td>Gap to nearest vehicle &ge;1.5&times; reaction radius, turn signal verified, zero braking forced on traffic.</td>
+          <td>Animation <code>T01</code> (Full Flourish) + audio sting (&le;2.0s) + <strong>+$10</strong> + <strong>+1 Professional Reputation</strong>.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:#B9770E;">Good</strong></td>
+          <td>Gap &ge;1.0&times; reaction radius, blinker declared.</td>
+          <td>Animation <code>T02</code> (Reduced Flourish) + <strong>+$5</strong>.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:#5C6779;">Messy</strong></td>
+          <td>Meets speed/lane rules but tight gaps; no collision.</td>
+          <td>No screen celebration; short horn tap from neighbor (<code>D11</code>). Payout: $0.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <strong>Zero Control Interruption:</strong> The player never surrenders steering during the celebration. While the visual overlay flashes, hitting <kbd>H</kbd> prompts nearby Safe/Normal drivers to honk back in camaraderie, yielding a +$2 bonus. Rewards pay out once per gate per trip to prevent exploitation.
+  </div>
+
+  <!-- SECTION 7 -->
+  <h2>7. Animation Inventory &amp; 50-Slot Reconciliation</h2>
+  <div class="card card-surface">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <h3 style="margin:0;">Budget Breakdown: 50 Total Allocated</h3>
+      <span class="pill pill-p2">18 Driving + 12 Transition = 30 Active</span>
+      <span class="pill pill-p3">12 Driving + 8 Transition = 20 Reserved</span>
+    </div>
+    <p style="margin-top:10px; font-size:13.5px; color:#5C6779;">Your 50 slots are preserved entirely. Code-driven procedural adjustments (cab squat, trailer angle, brake light shaders) consume 0 animation frames. To reconcile: submit your list of names, and duplicates will immediately fill the reserved slots.</p>
+  </div>
+
+  <h3>7.1 Driving Animations (18 Active / 12 Reserved)</h3>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Animation Name</th><th>Trigger Context</th><th>Pri</th><th>Next State</th><th>Fallback</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>D01</code></td><td>Cruise loop</td><td>Default cruise velocity</td><td><span class="pill pill-p4">P4</span></td><td>Any</td><td>F2 (Hold pose)</td></tr>
+        <tr><td><code>D02</code></td><td>Signal blink (L/R)</td><td>Player/AI intent to change lane</td><td><span class="pill pill-p3">P3</span></td><td>D03</td><td>F1 (Procedural tint)</td></tr>
+        <tr><td><code>D03</code></td><td>Lane shift (smooth)</td><td>Controlled lane transition</td><td><span class="pill pill-p3">P3</span></td><td>D01, D12</td><td>F1</td></tr>
+        <tr><td><code>D04</code></td><td>Brake tap</td><td>Target distance &lt; reaction radius</td><td><span class="pill pill-p2">P2</span></td><td>D01, D05</td><td>F1</td></tr>
+        <tr><td><code>D05</code></td><td>Hard brake + nose dip</td><td>Distance &lt; 0.5&times; reaction radius</td><td><span class="pill pill-p2">P2</span></td><td>D18, D01</td><td>F1</td></tr>
+        <tr><td><code>D06</code></td><td>Accelerate surge</td><td>Gap opens / Reckless overtaking</td><td><span class="pill pill-p2">P2</span></td><td>D01</td><td>F1</td></tr>
+        <tr><td><code>D07</code></td><td>Jerk swerve</td><td>Distracted/Tired lane correction</td><td><span class="pill pill-p2">P2</span></td><td>D01, D16</td><td>F1</td></tr>
+        <tr><td><code>D08</code></td><td>Serpentine weave</td><td>Drowsiness index &gt; 60</td><td><span class="pill pill-p2">P2</span></td><td>D01, D09</td><td>F1</td></tr>
+        <tr><td><code>D09</code></td><td>Stumble oscillation</td><td>Driver attention lapse / speed wobble</td><td><span class="pill pill-p2">P2</span></td><td>D01, D05</td><td>F1</td></tr>
+        <tr><td><code>D10</code></td><td>Drowsy bob / blink</td><td>Drowsiness index &gt; 30</td><td><span class="pill pill-p4">P4</span></td><td>D08</td><td>F3 (Skip)</td></tr>
+        <tr><td><code>D11</code></td><td>Horn bubble</td><td>Near miss, messy merge, horn tap</td><td><span class="pill pill-p3">P3</span></td><td>D01</td><td>F3</td></tr>
+        <tr><td><code>D12</code></td><td>Thank-you hazard flash</td><td>Yielded merge granted</td><td><span class="pill pill-p3">P3</span></td><td>D01</td><td>F3</td></tr>
+        <tr><td><code>D13</code></td><td>Yield drift right</td><td>Cruiser sirens/lights engaged</td><td><span class="pill pill-p2">P2</span></td><td>D14, T03</td><td>F1</td></tr>
+        <tr><td><code>D14</code></td><td>Slow-roll make room</td><td>Shoulder incident ahead</td><td><span class="pill pill-p2">P2</span></td><td>D01</td><td>F1</td></tr>
+        <tr><td><code>D15</code></td><td>Panic jitter (&plusmn;3&deg;)</td><td>Reckless fleeing / near disaster</td><td><span class="pill pill-p1">P1</span></td><td>D17, D18</td><td>F1</td></tr>
+        <tr><td><code>D16</code></td><td>Scrape bump</td><td>Scrape-tier collision</td><td><span class="pill pill-p1">P1</span></td><td>D01</td><td>F1</td></tr>
+        <tr><td><code>D17</code></td><td>Impact spin</td><td>Heavy-tier collision</td><td><span class="pill pill-p1">P1</span></td><td>D18</td><td>F1</td></tr>
+        <tr><td><code>D18</code></td><td>Skid wobble</td><td>Hard lockup at velocity</td><td><span class="pill pill-p1">P1</span></td><td>D01, T04</td><td>F1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>7.2 Transition Animations (12 Active / 8 Reserved)</h3>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Animation Name</th><th>Trigger Context</th><th>Pri</th><th>Next State</th><th>Fallback</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>T01</code></td><td>Merge flourish: Perfect</td><td>Perfect gate evaluation</td><td><span class="pill pill-p3">P3</span></td><td>Overlay return</td><td>Text banner</td></tr>
+        <tr><td><code>T02</code></td><td>Merge flourish: Good</td><td>Good gate evaluation</td><td><span class="pill pill-p3">P3</span></td><td>Overlay return</td><td>Text banner</td></tr>
+        <tr><td><code>T03</code></td><td>Pull over to shoulder</td><td>Cruiser pull-over ordered</td><td><span class="pill pill-p1">P1</span></td><td>T04</td><td>F1</td></tr>
+        <tr><td><code>T04</code></td><td>Stop settle, hazards on</td><td>Full vehicle stop on shoulder</td><td><span class="pill pill-p1">P1</span></td><td>T09, T05</td><td>F2</td></tr>
+        <tr><td><code>T05</code></td><td>Rejoin from shoulder</td><td>Police check resolved</td><td><span class="pill pill-p2">P2</span></td><td>D03</td><td>F1</td></tr>
+        <tr><td><code>T06</code></td><td>Exit ramp peel-off</td><td>AI/Player off-ramp exit</td><td><span class="pill pill-p3">P3</span></td><td>Despawn</td><td>F3</td></tr>
+        <tr><td><code>T07</code></td><td>Fade-to-black / Iris</td><td>Zone exit / Entrance transition</td><td><span class="pill pill-p1">P1</span></td><td>Scene reload</td><td>Hard cut</td></tr>
+        <tr><td><code>T08</code></td><td>Cruiser lights active</td><td>Patrol state enters LIGHTS</td><td><span class="pill pill-p1">P1</span></td><td>D13</td><td>F1</td></tr>
+        <tr><td><code>T09</code></td><td>Officer walks to window</td><td>Pulled-over view opens</td><td><span class="pill pill-p1">P1</span></td><td>T10</td><td>F2</td></tr>
+        <tr><td><code>T10</code></td><td>Paperwork exchange</td><td>Evidence presentation dialog</td><td><span class="pill pill-p1">P1</span></td><td>T05</td><td>Hard cut</td></tr>
+        <tr><td><code>T11</code></td><td>Trip log event card</td><td>Stop summary evaluation</td><td><span class="pill pill-p3">P3</span></td><td>Stop UI</td><td>Text screen</td></tr>
+        <tr><td><code>T12</code></td><td>Arrive and park cab</td><td>Stop arrival complete</td><td><span class="pill pill-p3">P3</span></td><td>Walk view</td><td>Hard cut</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12.5px; color:#5C6779;"><em>Priority Rules:</em> P1 interrupts P2–P4 immediately. P2–P4 hold min 0.25s before yielding. Equal priorities queue up to 0.5s before discarding.</p>
+
+  <!-- SECTION 8 -->
+  <h2>8. Personality Archetypes &amp; Modifiers</h2>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Parameter</th><th>Safe (Slice)</th><th>Normal (Slice Fill)</th><th>Reckless (Slice)</th><th>Distracted (Pass 2)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Speed vs. Flow</td><td>95%</td><td>100%</td><td>115%</td><td>90–105% (Fluctuating)</td></tr>
+        <tr><td>Follow Gap</td><td>2.0 s</td><td>1.5 s</td><td>0.8 s</td><td>1.5 s</td></tr>
+        <tr><td>Signal Lead</td><td>2.5 s</td><td>1.8 s</td><td>0.5 s (30% omitted)</td><td>1.0 s (40% omitted)</td></tr>
+        <tr><td>Accepted Merge Gap</td><td>4 lengths</td><td>3 lengths</td><td>1.5 lengths</td><td>3 lengths</td></tr>
+        <tr><td>Perception / Reaction</td><td>8 / 4 lengths</td><td>6 / 3 lengths</td><td>4 / 1.5 lengths</td><td>3 / 1.5 lengths</td></tr>
+        <tr><td>Reaction Delay</td><td>0.3 s</td><td>0.5 s</td><td>0.4 s</td><td>0.9 s</td></tr>
+        <tr><td>Signature Movement</td><td>Smooth lane centers</td><td>Stable cruise</td><td>Surge &amp; swerve (<code>D06</code>/<code>D07</code>)</td><td>Stumble &amp; drift (<code>D09</code>)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>8.2 Modifiers (5 Exact)</h3>
+  <ul>
+    <li><strong>Tired (Night Only):</strong> Drowsiness (0–100) spawns at 0–50, climbing +4/min after dusk. &gt;30: <code>D10</code> eyes blink; &gt;60: <code>D08</code> weave; &gt;85: <code>D09</code> stumbling drift.</li>
+    <li><strong>Hungry:</strong> Re-routes to diner exit; decelerates gradually and hugs the far-right lane.</li>
+    <li><strong>Late:</strong> Multiplies speed by &times;1.10 (compounding with archetype); accepts gaps 1 length tighter; hard acceleration surges.</li>
+    <li><strong>Needs Restroom:</strong> Slows unexpectedly, then executes a sudden 2-lane sweep to the ramp (<code>D05</code> &rarr; <code>T06</code>).</li>
+    <li><strong>Needs Gas:</strong> Drifts slowly toward fuel off-ramps with hesitant micro-braking.</li>
+  </ul>
+
+  <h3>8.3 Recurring Driver Cast</h3>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Driver</th><th>Vehicle Type</th><th>Base Archetype</th><th>Modifier</th><th>Assigned Exit</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>R1</strong></td><td>Dolores</td><td>Teal sedan</td><td>Safe</td><td>Hungry</td><td>Stop 2 exit (Slice)</td></tr>
+        <tr><td><strong>R2</strong></td><td>Kit</td><td>Red hatchback</td><td>Reckless</td><td>Late</td><td>Stop 2 exit (Slice Target)</td></tr>
+        <tr><td><strong>R3</strong></td><td>Walt</td><td>Wood-panel wagon</td><td>Safe</td><td>Needs restroom</td><td>Fuel exit (Deferred)</td></tr>
+        <tr><td><strong>R4</strong></td><td>Priya</td><td>Delivery van</td><td>Normal</td><td>Needs gas</td><td>Fuel exit (Deferred)</td></tr>
+        <tr><td><strong>R5</strong></td><td>Bo</td><td>Rusty pickup</td><td>Distracted</td><td>Tired (Night)</td><td>Stop 2 exit (Deferred)</td></tr>
+        <tr><td><strong>R6</strong></td><td>Hank</td><td>Classic semi</td><td>Normal</td><td>None</td><td>Stop 2 exit (Slice)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-warn">
+    <strong>Tuning Validation for Kit (R2):</strong> Kit is mathematically tailored to trigger Highway Patrol speeding thresholds: <code>115% (Reckless) &times; 1.10 (Late) = 126.5% of segment flow</code>. This puts him precisely above the +15% minor speeding threshold without crossing into the +30% reckless category.
+  </div>
+
+  <!-- SECTION 9 -->
+  <h2>9. Truck-Stop Characters &amp; Social Memory</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Character</th><th>Role</th><th>Station</th><th>Slice Mechanics &amp; Narrative Interactions</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Lou</strong></td><td>Dispatcher</td><td>Stop 1</td><td>Hands out jobs, route cards, and warnings (90% reliable). Remembers delivery tardiness. Job offerings scale with Professional Reputation.</td></tr>
+        <tr><td><strong>Tamsin</strong></td><td>Mechanic</td><td>Stop 1</td><td>Performs modular fixes: Tires ($40), Alignment ($30), Lights ($20). Unrepaired damage carries over visually and mechanically into run 2.</td></tr>
+        <tr><td><strong>Rosa</strong></td><td>Waitress</td><td>Stop 1</td><td>Shares diner chatter. Tracks driver absences. Alerts player to dynamic police crackdowns.</td></tr>
+        <tr><td><strong>Dolores (R1)</strong></td><td>Driver</td><td>Stop 2</td><td>Prefers safe truckers. If player yields to her merge, provides a verified Route A congestion shortcut tip.</td></tr>
+        <tr><td><strong>Kit (R2)</strong></td><td>Speedster</td><td>Stop 2</td><td>Brash speeder. Scripted target of S4 shoulder stop. Subdued or missing at Stop 2 depending on whether he fled or complied.</td></tr>
+        <tr><td><strong>Hank (R6)</strong></td><td>Veteran Semi</td><td>CB Radio</td><td>CB banter during highway hauls; supplies trucker gossip at Stop 2 (70% reliability).</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>Memory Architecture:</strong> Each character records an emotional state regarding the player: <code>Helped</code>, <code>Harmed</code>, <code>Ignored</code>, or <code>Collided</code>. Dialogue and service prices dynamically adapt on return trips.</p>
+
+  <!-- SECTION 10 & 11 -->
+  <h2>10. Police &amp; Systemic Traffic Response</h2>
+
+  <h3>10.1 Units &amp; Detection Channels</h3>
+  <ul>
+    <li><strong>Highway Patrol:</strong> 1 active cruiser in Zone 1. Direct vision radius = 6 car lengths.</li>
+    <li><strong>Speed Trap:</strong> 1 stationary radar cruiser parked in the S6B bypass.</li>
+    <li><strong>Civilian Witness Calling:</strong> Safe/Normal drivers witness collisions or reckless behavior and place CB/phone reports after <code>20s &plusmn; 8s</code> (12–28s window). Pulling over to exchange insurance cancels the call.</li>
+  </ul>
+
+  <h3>10.2 Detected Infractions</h3>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Infraction</th><th>Trigger Condition <em>(start)</em></th><th>Legal Attention (LA) Impact</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Speeding (Minor)</td><td>&gt; Limit +15% for &gt;3 continuous seconds</td><td>+5 LA</td></tr>
+        <tr><td>Speeding (Major)</td><td>&gt; Limit +30% for &gt;2 continuous seconds</td><td>+12 LA</td></tr>
+        <tr><td>Unsafe Lane Change</td><td>Undeclared lateral entry into occupied reaction radius</td><td>+6 LA</td></tr>
+        <tr><td>Reckless Driving</td><td>&ge;3 near misses or sharp lane infractions within 10s</td><td>+15 LA</td></tr>
+        <tr><td>Contact Collision</td><td>Contact-tier or Heavy-tier crash</td><td>+10 LA</td></tr>
+        <tr><td>Hit-and-Run</td><td>Failure to halt on shoulder within 8s of Contact collision</td><td>+30 LA</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>10.3 Dispatch &amp; Enforcement State Machine</h3>
+  <pre>P0: CALM 
+  &rarr; Infraction logged 
+  &rarr; P1: DISPATCHED (Cruiser spawns offscreen 15–30s later at 130% flow)
+  &rarr; P2: OBSERVE (Pace-matches player for 3s)
+  &rarr; P3: LIGHTS (Flashers on; player given 8.0s to signal and pull to shoulder)
+        &boxur;&rarr; Comply within 8s &rarr; P5: PULLED OVER (Window paperwork exchange)
+        &boxur;&rarr; Ignore / Evade  &rarr; P4: PURSUIT (Hard cap 60s)
+              &boxur;&rarr; Crash / Cornered &rarr; ARREST
+              &boxur;&rarr; Off-ramp + 15s break-of-sight &rarr; ESCAPED (LA persists into next zone)</pre>
+
+  <h3>10.4 Universal Civilian YIELD Protocol</h3>
+  <p>Triggered whenever cruiser lights activate within 10 car lengths or an active incident occupies the shoulder:</p>
+  <ul>
+    <li><strong>Safe Drivers (0.3s reaction):</strong> Signal, smoothly drift right, decelerate to 60% flow with hazards active.</li>
+    <li><strong>Normal Drivers (0.5s reaction):</strong> Vacate the adjacent lane, moderate brake application.</li>
+    <li><strong>Reckless Drivers (0.4s reaction):</strong> Late braking; if pursued directly, 25% roll to bolt and flee.</li>
+    <li><strong>Distracted Drivers (0.9s reaction):</strong> Delayed perception; abrupt emergency brake or swerve (<code>D09</code>).</li>
+    <li><strong>Systemic Guarantee (AT-19):</strong> Traffic algorithms must guarantee an unblocked path of &ge;1.5 truck widths around all shoulder incidents at all times.</li>
+  </ul>
+
+  <!-- SECTION 12 -->
+  <h2>12. Collision Tiers &amp; Consequences</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Collision Tier</th><th>Closing Velocity</th><th>Kinetic Response &amp; Outcomes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Clear</strong></td><td>0% (No overlap)</td><td>Zero penalty.</td></tr>
+        <tr><td><strong>Scrape</strong></td><td>&lt;15% top speed</td><td>Cosmetic scrape (<code>D16</code>), horn honk, +2 LA. No stop mandated.</td></tr>
+        <tr><td><strong>Contact</strong></td><td>15%–35% top speed</td><td>Other vehicle moves to shoulder. Player granted 8.0s to stop. Paperwork exchange, +10 LA, reputation check.</td></tr>
+        <tr><td><strong>Heavy</strong></td><td>35%–60% top speed</td><td>Violent spin/skid (<code>D17</code>/<code>D18</code>). Immediate pull-over mandatory. Additional +10 LA, cargo damage dice roll.</td></tr>
+        <tr><td><strong>Fatal</strong></td><td>&gt;60% top speed</td><td>Severe wreck. Immediate Game Over screen.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 15 -->
+  <h2>15. Notoriety &amp; Economy Tracks</h2>
+  <p>Four independent tracks—never flattened into a single score:</p>
+  <ul>
+    <li><strong>Professional Reputation (0–100, starts at 50):</strong> Dictates high-paying cargo contracts from Lou.</li>
+    <li><strong>Personal Relationships (&minus;3 to +3 per NPC):</strong> Controls prices, repair discounts, and dialogue warmth.</li>
+    <li><strong>Legal Attention (0–100, decays &minus;1/min of clean driving):</strong>
+      <ul style="margin-top:4px;">
+        <li><em>0–24:</em> Standard highway patrol baseline.</li>
+        <li><em>25–59:</em> Elevated patrol frequency; witness response window drops to 12s.</li>
+        <li><em>60–100:</em> Aggressive cruiser pursuit; zero warning leniency; Lou withholds high-profile jobs.</li>
+      </ul>
+    </li>
+    <li><strong>Criminal Obligations:</strong> Reserved for post-slice expansion.</li>
+  </ul>
+
+  <!-- SECTION 16 -->
+  <h2>16. Acceptance Test Suite (AT-01 to AT-27)</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Target Verification</th><th>Precise Engineering Pass Criteria</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>AT-01</strong></td><td>Cab Anchor</td><td>Cab Y remains inside &plusmn;0.5 cab margin continuously over 5-minute stress test.</td></tr>
+        <tr><td><strong>AT-02</strong></td><td>Soft Wells</td><td>Cursor angle &theta;=70&deg; outputs front wheel &delta;=21&deg;&plusmn;1&deg; at 0 velocity.</td></tr>
+        <tr><td><strong>AT-03</strong></td><td>Centering Spring</td><td>At top speed, returning cursor to 12:00 restores front wheels to &lt;5&deg; within 1.5s.</td></tr>
+        <tr><td><strong>AT-04</strong></td><td>Hitch Integrity</td><td>Hitch-to-axle distance error strictly &lt;1.0 px over 3 continuous minutes.</td></tr>
+        <tr><td><strong>AT-05</strong></td><td>Framerate Invariance</td><td>Trailer kinematics identical across 30, 60, and 144 FPS simulations.</td></tr>
+        <tr><td><strong>AT-06</strong></td><td>Lock-to-Lock Brake</td><td>Full steering lock into emergency stop yields zero numerical jitter or hitch separation.</td></tr>
+        <tr><td><strong>AT-07</strong></td><td>Blind Usability</td><td>4 of 5 cold testers execute deliberate lane change within 60s without instructions.</td></tr>
+        <tr><td><strong>AT-08</strong></td><td>Merge Fairness</td><td>100% of highway merges show visual cues &ge;2.0s prior to boundary crossing.</td></tr>
+        <tr><td><strong>AT-09</strong></td><td>Unsignaled Drift</td><td>Unsignaled AI merges exhibit clear lateral drift for &ge;0.6s before lane entry.</td></tr>
+        <tr><td><strong>AT-10</strong></td><td>Collision Escapes</td><td>In 100 automated random merges, a crash-free deceleration or escape path exists in 100%.</td></tr>
+        <tr><td><strong>AT-11</strong></td><td>Gate Evaluation</td><td>Perfect, Good, and Messy evaluations accurately trigger across 20 automated gate cases.</td></tr>
+        <tr><td><strong>AT-12</strong></td><td>Celebration Input</td><td>Player maintains 100% steering and throttle authority during celebration overlays.</td></tr>
+        <tr><td><strong>AT-13</strong></td><td>Anti-Farm Guard</td><td>Re-crossing a merge gate in the same run issues 0 duplicate cash/reputation rewards.</td></tr>
+        <tr><td><strong>AT-14</strong></td><td>Radar Accuracy</td><td>Cruising +25% over limit for 4s logs exactly one Minor Speeding violation.</td></tr>
+        <tr><td><strong>AT-15</strong></td><td>Witness Delay</td><td>Civilian witness report fires between 12s and 28s; pulling over successfully aborts call.</td></tr>
+        <tr><td><strong>AT-16</strong></td><td>Pursuit Timer</td><td>Cruiser sirens initiate pursuit exactly 8.0s after failure to pull over.</td></tr>
+        <tr><td><strong>AT-17</strong></td><td>Pursuit Termination</td><td>Evasion or capture strictly resolves within 60.0s in 100% of pursuit scenarios.</td></tr>
+        <tr><td><strong>AT-18</strong></td><td>Deterministic Resolvers</td><td>Identical evidence, statement, and seed produce identical ticket/warning outcomes.</td></tr>
+        <tr><td><strong>AT-19</strong></td><td>Reachable Clearance</td><td>Drivable gap &ge;1.5 truck widths exists in 100% of 200 simulated shoulder incident scenes.</td></tr>
+        <tr><td><strong>AT-20</strong></td><td>Universal Yield</td><td>100% of cars within 10 lengths show distinct yield response within 1.5s of cruiser lights.</td></tr>
+        <tr><td><strong>AT-21</strong></td><td>Visual Persistence</td><td>Recurring cars R1 &amp; R2 maintain identical palettes and behavioral parameters in run 2.</td></tr>
+        <tr><td><strong>AT-22</strong></td><td>Cast Recognition</td><td>At least 3 of 5 human testers unpromptedly identify a recurring driver on second drive.</td></tr>
+        <tr><td><strong>AT-23</strong></td><td>Character Memory</td><td>NPC dialogue accurately reflects prior Helped/Harmed/Collided interaction flags.</td></tr>
+        <tr><td><strong>AT-24</strong></td><td>Asset Fallbacks</td><td>Zero crashes or soft-locks when animation assets are deleted (triggers F1/F2/F3).</td></tr>
+        <tr><td><strong>AT-25</strong></td><td>Centralized Tuning</td><td>100% of marked <em>(start)</em> variables reside in a solitary config file; zero hardcoding.</td></tr>
+        <tr><td><strong>AT-26</strong></td><td>Replay Drive</td><td>At least 4 of 5 cold testers choose to start drive 2 without prodding.</td></tr>
+        <tr><td><strong>AT-27</strong></td><td>Kit Violation Band</td><td>Kit's speed (126.5% flow) files as Minor Speeding, strictly below Major Speeding (+30%).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 17: ROADMAP & PHASING -->
+  <h2>17. Phased Implementation Roadmap</h2>
+
+  <div class="card card-surface">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <h3 style="margin:0;">Workstreams &amp; Operational Roles</h3>
+    </div>
+    <div class="card-grid" style="margin-top:14px; margin-bottom:0;">
+      <div class="card-grid-item">
+        <strong>Creative Director (You)</strong>
+        <p style="font-size:12.5px; color:#5C6779; margin-top:4px;">Directs feel, approves tuning values, writes character dialog, and evaluates the Phase 4 gate.</p>
+      </div>
+      <div class="card-grid-item">
+        <strong>Builder Operator (You or Hired)</strong>
+        <p style="font-size:12.5px; color:#5C6779; margin-top:4px;">Operates the generative AI builder, manages single-prompt prompts, and maintains version control.</p>
+      </div>
+      <div class="card-grid-item">
+        <strong>Technical Collaborator</strong>
+        <p style="font-size:12.5px; color:#5C6779; margin-top:4px;">On-call support to resolve math anomalies, frame-rate decoupling, or kinematic drift.</p>
+      </div>
+      <div class="card-grid-item">
+        <strong>Test Lead &amp; 5 Strangers</strong>
+        <p style="font-size:12.5px; color:#5C6779; margin-top:4px;">Neutral testers with zero prior project exposure to run unassisted usability and replay gates.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- Phase 0 -->
+    <div class="timeline-step">
+      <div class="timeline-dot"></div>
+      <div class="timeline-header">
+        <div class="timeline-title">Phase 0: Steering Toy &amp; Kinematics</div>
+        <div class="timeline-date">16 Nov – 20 Nov 2026</div>
+      </div>
+      <div class="timeline-body">
+        <p><strong>Primary Goal:</strong> Establish an intoxicating cab-and-trailer driving feel using pointer lock and soft wells before generating traffic or world assets.</p>
+        <p><strong>Action Items:</strong> Builder executes Prompts 1 &amp; 2. Creative Director tunes wheel centering, trailer swing gain, and elastic margin. Run 2 informal playtests Wednesday; run 5 cold testers on Friday.</p>
+        <p style="margin-bottom:0;"><strong>Checkpoints:</strong> Pass AT-01 through AT-07. <strong>Go/No-Go Gate:</strong> &ge;4 of 5 strangers make deliberate lane changes within 60s and &ge;3 want to replay. If failed, halt and bring in developer support.</p>
+      </div>
+    </div>
+
+    <!-- Phase 1 -->
+    <div class="timeline-step">
+      <div class="timeline-dot"></div>
+      <div class="timeline-header">
+        <div class="timeline-title">Phase 1: Highway Segments &amp; Flag Merge Gate</div>
+        <div class="timeline-date">23 Nov – 04 Dec 2026</div>
+      </div>
+      <div class="timeline-body">
+        <p><strong>Primary Goal:</strong> Build scrolling infrastructure (S1–S3), lane changes, and the satisfying Mario flag-style micro-cutscene.</p>
+        <p><strong>Action Items:</strong> Construct segments S1–S3; implement Safe and Reckless dynamic vehicles; program Merge Gates 1 &amp; 2 evaluation logic and celebratory overlays (T01/T02).</p>
+        <p style="margin-bottom:0;"><strong>Checkpoints:</strong> Pass AT-08 to AT-13. Zero playtesters report highway merging as unfair.</p>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="timeline-step">
+      <div class="timeline-dot"></div>
+      <div class="timeline-header">
+        <div class="timeline-title">Phase 2: Inhabited Highway &amp; Systemic Police</div>
+        <div class="timeline-date">07 Dec – 18 Dec 2026</div>
+      </div>
+      <div class="timeline-body">
+        <p><strong>Primary Goal:</strong> Bring character and consequence to the highway. Script the S4 police intervention and civilian reaction logic.</p>
+        <p><strong>Action Items:</strong> Implement recurring cars R1 (Dolores), R2 (Kit), and R6 (Hank); code the universal civilian YIELD protocol; deploy Highway Patrol pursuit state machine and S4 scripted stop scene.</p>
+        <p style="margin-bottom:0;"><strong>Checkpoints:</strong> Pass AT-14 to AT-20 and AT-27. Guaranteed clearance corridor &ge;1.5 truck widths around Kit's stop.</p>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="timeline-step">
+      <div class="timeline-dot"></div>
+      <div class="timeline-header">
+        <div class="timeline-title">Phase 3: Consequences, Interchanges &amp; The Return</div>
+        <div class="timeline-date">21 Dec 2026 – 08 Jan 2027</div>
+      </div>
+      <div class="timeline-body">
+        <p><strong>Primary Goal:</strong> Complete the loop. Route forks, Stop 2 delivery settlement, social memory, and economic progression.</p>
+        <p><strong>Action Items:</strong> Code collision tiers and window exchange resolver; generate S5 interchange, S6A and S6B routes; build Stop 1 and Stop 2 dialogue interfaces with Lou, Tamsin, Rosa, and drivers.</p>
+        <p style="margin-bottom:0;"><strong>Checkpoints:</strong> Pass AT-21, AT-23, and AT-24. Persistent vehicle damage cleanly bridges hauls.</p>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="timeline-step">
+      <div class="timeline-dot"></div>
+      <div class="timeline-header">
+        <div class="timeline-title">Phase 4: Cold Evaluation &amp; Expansion Verdict</div>
+        <div class="timeline-date">11 Jan – 22 Jan 2027</div>
+      </div>
+      <div class="timeline-body">
+        <p><strong>Primary Goal:</strong> Formal verification against the 5 non-negotiable definition-of-done criteria with 5 fresh, unassisted strangers.</p>
+        <p><strong>Action Items:</strong> Recruit 5 completely unbiased test subjects; technical lead logs bugs without intervening; director evaluates the 5 §1 gates.</p>
+        <p style="margin-bottom:0;"><strong>Verdict Gate:</strong> Pass &rarr; Begin rolling out Zones 2–8 using identical modular assets. Fail &rarr; Polish weakest metric and retest once. Two failures &rarr; Pause and re-evaluate product premise.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>Critical Builder Risk &amp; Mitigation:</strong> Never dump this entire specification into Rosebud AI or ChatGPT in one batch. Overloading generative tools causes contradictory logic and broken states. Feed prompts strictly one subsystem at a time per §18, verify acceptance tests, export a snapshot, and proceed only upon green test passes.
+  </div>
+
+  <!-- SECTION 18 & 19 -->
+  <h2>18. Builder Prompts (Sequential Execution)</h2>
+  
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;">
+      <h3 style="margin:0;">Prompt 1: The Steering Toy (Phase 0)</h3>
+      <span class="pill pill-p2">Copy / Paste Ready</span>
+    </div>
+    <pre>Build a top-down scrolling highway with 3 lanes. The cab is fixed at 75% of screen height with a small elastic forward/back margin. The mouse steers using pointer lock: the cursor's angle around an invisible wheel centre on the cab maps piecewise-linearly to wheel rotation through these anchors: 0° to 0, 20° to 90°, 40° to 360°, 70° to 540°, 115° to 720°, 150° to 900°, mirrored left and right, clamped beyond 150°. Front-wheel angle is rotation/900 × 35°, with the maximum reduced by the factor (1 − 0.75 × speed/top speed). Neutral spring strength scales with speed. Space is gas, F is brake, W/S shift. Show a wheel overlay with a hand at the cursor. Put every constant in one editable tuning file. No traffic, no menus.</pre>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;">
+      <h3 style="margin:0;">Prompt 2: Articulated Trailer Kinematics (Phase 0)</h3>
+      <span class="pill pill-p2">Copy / Paste Ready</span>
+    </div>
+    <pre>Add an articulated trailer. Use a fixed 1/60 s timestep with an accumulator capped at 5 steps. Cab: dθc/dt = (v/WB)·tan(δ). Trailer: dθt/dt = (v/L)·sin(θc − θt), with the trailer axle positioned from the hitch by constraint, not integrated. Add a trailer-swing visual gain to the tuning file. Test: full lock, then hard brake, with no jitter or separation.</pre>
+  </div>
+
+  <p><strong>Prompts 3 through 14:</strong> Execute remaining components strictly following the §18 dependency chain (Pedals &amp; signals &rarr; Road S1–S3 &rarr; Merge cars &rarr; Merge gates &rarr; Reaction radii &rarr; Recurring drivers &rarr; Collisions &rarr; Police state machine &rarr; Exchange UI &rarr; Stop scenes &rarr; Memory dialogue &rarr; Authored animation sprite swaps).</p>
+
+  <footer>
+    Generated by the Decidi Council — checked by the proprietary Final QA audit · decidi.ai
+  </footer>
+
+</div>
+</body>
+</html>
